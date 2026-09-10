@@ -3,7 +3,7 @@ from groq import Groq
 from mastodon import Mastodon
 from dotenv import load_dotenv
 
-# Charge les variables d'environnement
+# Charge les variables d'environnement (.env en local)
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -39,14 +39,14 @@ def generer_publication_kelia():
                     "content": prompt
                 }
             ],
-            model="llama3-70b-8192", 
+            model="openai/gpt-oss-120b", 
             temperature=0.7,
             max_tokens=150
         )
         
         texte = chat_completion.choices[0].message.content.strip()
         
-        # Sécurité pour ne jamais dépasser la limite de caractères
+        # Sécurité pour ne pas dépasser la limite
         if len(texte) > 400:
             texte = texte[:397] + "..."
             
@@ -60,20 +60,20 @@ def publier_sur_truth_social(texte):
     try:
         print("Connexion à Truth Social en cours...")
         
-        # 1. Création d'une application interne temporaire
+        # 1. Enregistrement d'une application temporaire
         Mastodon.create_app(
             'KeliaBot',
             api_base_url=TRUTH_SOCIAL_URL,
             to_file='kelia_clientcred.secret'
         )
         
-        # 2. Initialisation avec Truth Social
+        # 2. Initialisation
         truth = Mastodon(
             client_id='kelia_clientcred.secret',
             api_base_url=TRUTH_SOCIAL_URL
         )
         
-        # 3. Connexion via Email et Mot de passe
+        # 3. Connexion au compte Kelo Social
         truth.log_in(
             TS_EMAIL,
             TS_PASSWORD
@@ -86,12 +86,12 @@ def publier_sur_truth_social(texte):
     except Exception as e:
         print(f"Erreur lors de la publication sur Truth Social : {e}")
     finally:
-        # Nettoyage du fichier secret généré temporairement
+        # Nettoyage du fichier secret généré lors de l'exécution
         if os.path.exists('kelia_clientcred.secret'):
             os.remove('kelia_clientcred.secret')
 
 if __name__ == "__main__":
-    print("Éveil de KELIA sur Groq...")
+    print("Éveil de KELIA sur Groq (modèle openai/gpt-oss-120b)...")
     publication = generer_publication_kelia()
     
     if publication:
