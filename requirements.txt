@@ -1,0 +1,3 @@
+groq
+Mastodon.py
+python-dotenv
